@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
-apply plugin: 'com.neenbedankt.android-apt'
+//apply plugin: 'com.neenbedankt.android-apt'
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"

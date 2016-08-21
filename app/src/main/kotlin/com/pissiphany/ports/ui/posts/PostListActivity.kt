@@ -6,20 +6,32 @@ import android.util.Log
 import android.widget.ListView
 import com.pissiphany.ports.domain.Domain
 import com.pissiphany.ports.domain.model.Post
-import com.pissiphany.ports.repository.db.MockDatabaseService
-import com.pissiphany.ports.repository.jsonPlaceholder.buildJsonPlaceholderService
 import com.pissiphany.ports.ui.R
+import com.pissiphany.ports.ui.di.DaggerPostListActivityComponent
+import com.pissiphany.ports.ui.di.DatabaseServiceModule
+import com.pissiphany.ports.ui.di.JsonPlaceholderServiceModule
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
+import javax.inject.Inject
 
 class PostListActivity : AppCompatActivity() {
     val subscriptions = CompositeSubscription()
     lateinit var listView: ListView
     lateinit var adapter: PostListAdapter
 
+    @Inject lateinit var domain: Domain
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        DaggerPostListActivityComponent
+                .builder()
+                .databaseServiceModule(DatabaseServiceModule())
+                .jsonPlaceholderServiceModule(JsonPlaceholderServiceModule())
+                .build()
+                .inject(this)
+
         setContentView(R.layout.activity_post_list)
 
         adapter = PostListAdapter(this, R.layout.activity_post_list_item)
@@ -27,7 +39,6 @@ class PostListActivity : AppCompatActivity() {
         listView.adapter = adapter
 
         if (savedInstanceState == null) {
-            val domain = Domain(MockDatabaseService(), buildJsonPlaceholderService())
             subscriptions.add(domain.posts()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
